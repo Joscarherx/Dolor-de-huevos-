@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocialCircle | Conecta con tu círculo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Animation for posts */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .post-animation {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Custom checkbox for remember me */
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #4f46e5;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #4f46e5;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '\2713';
+            font-size: 12px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Pulse animation for notifications */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Login Modal (shown by default) -->
+    <div id="loginModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+                <h2 class="text-2xl font-bold">Bienvenido a SocialCircle</h2>
+                <p class="text-purple-200">Conecta con tu círculo social</p>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="login-email">
+                        Correo electrónico
+                    </label>
+                    <input id="login-email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500" type="email" placeholder="tucorreo@ejemplo.com">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="login-password">
+                        Contraseña
+                    </label>
+                    <input id="login-password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500" type="password" placeholder="********">
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="custom-checkbox mr-2">
+                        <label for="remember-me" class="text-sm text-gray-700">Recordarme</label>
+                    </div>
+                    <a href="#" class="text-sm text-purple-600 hover:text-purple-800">¿Olvidaste tu contraseña?</a>
+                </div>
+                <div class="flex flex-col space-y-3">
+                    <button id="loginButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Iniciar sesión
+                    </button>
+                    <button class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-2 px-4 rounded flex items-center justify-center transition duration-300">
+                        <i class="fab fa-google text-red-500 mr-2"></i> Continuar con Google
+                    </button>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-gray-600 text-sm">¿No tienes una cuenta? <a href="#" id="showRegister" class="text-purple-600 hover:text-purple-800">Regístrate</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal (hidden by default) -->
+    <div id="registerModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white">
+                <h2 class="text-2xl font-bold">Únete a SocialCircle</h2>
+                <p class="text-indigo-200">Crea tu cuenta ahora</p>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-name">
+                        Nombre completo
+                    </label>
+                    <input id="register-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" type="text" placeholder="Juan Pérez">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-email">
+                        Correo electrónico
+                    </label>
+                    <input id="register-email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" type="email" placeholder="tucorreo@ejemplo.com">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-password">
+                        Contraseña
+                    </label>
+                    <input id="register-password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" type="password" placeholder="********">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="register-confirm">
+                        Confirmar contraseña
+                    </label>
+                    <input id="register-confirm" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" type="password" placeholder="********">
+                </div>
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terms" class="custom-checkbox mr-2">
+                        <label for="terms" class="text-sm text-gray-700">Acepto los <a href="#" class="text-indigo-600 hover:text-indigo-800">Términos y condiciones</a></label>
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-3">
+                    <button id="registerButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+                        Registrarse
+                    </button>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-gray-600 text-sm">¿Ya tienes una cuenta? <a href="#" id="showLogin" class="text-indigo-600 hover:text-indigo-800">Inicia sesión</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until login) -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <!-- Logo -->
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center">
+                            <i class="fas fa-users text-purple-600 text-2xl mr-2"></i>
+                            <span class="text-xl font-bold text-gray-900">SocialCircle</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="flex-1 max-w-xl mx-4">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white" placeholder="Buscar en SocialCircle...">
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="flex items-center space-x-4">
+                        <button class="p-1 rounded-full text-gray-600 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-home text-xl"></i>
+                        </button>
+                        <button class="p-1 rounded-full text-gray-600 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-user-friends text-xl"></i>
+                        </button>
+                        <button class="p-1 rounded-full text-gray-600 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-video text-xl"></i>
+                        </button>
+                        <button class="p-1 rounded-full text-gray-600 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-store text-xl"></i>
+                        </button>
+                        <button class="p-1 rounded-full text-gray-600 hover:text-purple-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-gamepad text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="flex items-center space-x-2">
+                        <button id="notificationsBtn" class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center pulse">3</span>
+                        </button>
+                        <button id="messagesBtn" class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 relative">
+                            <i class="fas fa-comment-dots text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                        </button>
+                        <div class="relative">
+                            <button id="userMenuBtn" class="flex items-center space-x-1 focus:outline-none">
+                                <img id="userAvatar" class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User profile">
+                                <span id="userName" class="text-sm font-medium text-gray-700">Juan Pérez</span>
+                            </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tu perfil</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configuración</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Guardado</a>
+                                <div class="border-t border-gray-200"></div>
+                                <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cerrar sesión</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Sidebar -->
+                <div class="w-full lg:w-1/4 space-y-4">
+                    <!-- User Profile Card -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex flex-col items-center">
+                            <img id="profileAvatar" class="h-24 w-24 rounded-full object-cover mb-3 border-4 border-purple-200" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile picture">
+                            <h3 id="profileName" class="text-lg font-bold text-gray-900">Juan Pérez</h3>
+                            <p class="text-sm text-gray-500">Desarrollador Web</p>
+                        </div>
+                        <div class="border-t border-gray-200 mt-4 pt-4">
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-500">Amigos</span>
+                                <span class="text-purple-600 font-medium">1,234</span>
+                            </div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="text-gray-500">Publicaciones</span>
+                                <span class="text-purple-600 font-medium">567</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500">Grupos</span>
+                                <span class="text-purple-600 font-medium">23</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shortcuts -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-bold text-gray-900 mb-3">Tus accesos directos</h3>
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" class="flex items-center text-gray-700 hover:text-purple-600">
+                                    <i class="fas fa-users mr-3 text-blue-500"></i>
+                                    <span>Grupo de programación</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center text-gray-700 hover:text-purple-600">
+                                    <i class="fas fa-utensils mr-3 text-green-500"></i>
+                                    <span>Amantes de la comida</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center text-gray-700 hover:text-purple-600">
+                                    <i class="fas fa-plane mr-3 text-yellow-500"></i>
+                                    <span>Viajeros del mundo</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center text-gray-700 hover:text-purple-600">
+                                    <i class="fas fa-music mr-3 text-red-500"></i>
+                                    <span>Fanáticos de la música</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Events -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-gray-900">Eventos próximos</h3>
+                            <button class="text-purple-600 text-sm">Ver todos</button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-start">
+                                <div class="bg-purple-100 text-purple-800 rounded-lg p-2 mr-3">
+                                    <div class="text-xs font-bold">JUN</div>
+                                    <div class="text-lg font-bold text-center">15</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium">Meetup de desarrolladores</h4>
+                                    <p class="text-xs text-gray-500">10:00 AM - Café Central</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-blue-100 text-blue-800 rounded-lg p-2 mr-3">
+                                    <div class="text-xs font-bold">JUN</div>
+                                    <div class="text-lg font-bold text-center">22</div>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-medium">Concierto al aire libre</h4>
+                                    <p class="text-xs text-gray-500">6:00 PM - Parque Central</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Feed -->
+                <div class="w-full lg:w-2/4 space-y-4">
+                    <!-- Create Post -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-start space-x-3">
+                            <img id="postAvatar" class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User avatar">
+                            <button class="flex-1 bg-gray-100 hover:bg-gray-200 rounded-full py-2 px-4 text-left text-gray-500 transition duration-300" id="createPostBtn">
+                                ¿Qué estás pensando, Juan?
+                            </button>
+                        </div>
+                        <div class="border-t border-gray-200 mt-3 pt-3 flex justify-between">
+                            <button class="flex items-center justify-center flex-1 text-gray-600 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                <i class="fas fa-video text-red-500 mr-2"></i> Video en vivo
+                            </button>
+                            <button class="flex items-center justify-center flex-1 text-gray-600 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                <i class="fas fa-images text-green-500 mr-2"></i> Foto/video
+                            </button>
+                            <button class="flex items-center justify-center flex-1 text-gray-600 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                <i class="fas fa-smile text-yellow-500 mr-2"></i> Sentimiento/actividad
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Post Modal (hidden by default) -->
+                    <div id="postModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+                        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
+                            <div class="border-b border-gray-200 p-4 flex justify-between items-center">
+                                <h3 class="text-xl font-bold text-gray-900">Crear publicación</h3>
+                                <button id="closePostModal" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times text-xl"></i>
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-start space-x-3 mb-4">
+                                    <img id="modalAvatar" class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User avatar">
+                                    <div>
+                                        <h4 id="modalName" class="font-medium">Juan Pérez</h4>
+                                        <select class="text-xs border border-gray-300 rounded-md px-2 py-1 bg-gray-100 focus:outline-none focus:ring-1 focus:ring-purple-500">
+                                            <option>Público</option>
+                                            <option>Amigos</option>
+                                            <option>Solo yo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <textarea id="postContent" class="w-full border-0 focus:ring-0 text-lg placeholder-gray-500 resize-none" rows="5" placeholder="¿Qué estás pensando, Juan?"></textarea>
+                                <div class="border border-gray-200 rounded-lg p-3 mb-4 hidden" id="previewContainer">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium">Vista previa</span>
+                                        <button id="removePreview" class="text-gray-500 hover:text-gray-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <img id="imagePreview" class="w-full rounded-lg hidden" src="" alt="Preview">
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-3 flex justify-between items-center">
+                                    <span class="text-sm font-medium">Añadir a tu publicación</span>
+                                    <div class="flex space-x-2">
+                                        <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                            <i class="fas fa-images text-green-500"></i>
+                                        </button>
+                                        <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                            <i class="fas fa-user-tag text-blue-500"></i>
+                                        </button>
+                                        <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                            <i class="fas fa-smile text-yellow-500"></i>
+                                        </button>
+                                        <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                            <i class="fas fa-map-marker-alt text-red-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-200 p-4">
+                                <button id="publishPost" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 disabled:opacity-50" disabled>
+                                    Publicar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stories -->
+                    <div class="bg-white rounded-lg shadow p-4 overflow-hidden">
+                        <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                            <!-- Story 1 -->
+                            <div class="flex-shrink-0 relative rounded-lg overflow-hidden w-32 h-48 bg-gradient-to-t from-gray-900 to-transparent">
+                                <img class="absolute inset-0 w-full h-full object-cover z-0" src="https://source.unsplash.com/random/300x500/?mountain" alt="Story">
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="h-10 w-10 rounded-full border-4 border-blue-500 overflow-hidden">
+                                        <img class="h-full w-full object-cover" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 z-10">
+                                    <p class="text-white text-sm font-medium">Ana López</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Story 2 -->
+                            <div class="flex-shrink-0 relative rounded-lg overflow-hidden w-32 h-48 bg-gradient-to-t from-gray-900 to-transparent">
+                                <img class="absolute inset-0 w-full h-full object-cover z-0" src="https://source.unsplash.com/random/300x500/?beach" alt="Story">
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="h-10 w-10 rounded-full border-4 border-blue-500 overflow-hidden">
+                                        <img class="h-full w-full object-cover" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User">
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 z-10">
+                                    <p class="text-white text-sm font-medium">Carlos Ruiz</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Story 3 -->
+                            <div class="flex-shrink-0 relative rounded-lg overflow-hidden w-32 h-48 bg-gradient-to-t from-gray-900 to-transparent">
+                                <img class="absolute inset-0 w-full h-full object-cover z-0" src="https://source.unsplash.com/random/300x500/?city" alt="Story">
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="h-10 w-10 rounded-full border-4 border-blue-500 overflow-hidden">
+                                        <img class="h-full w-full object-cover" src="https://randomuser.me/api/portraits/women/33.jpg" alt="User">
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 z-10">
+                                    <p class="text-white text-sm font-medium">María García</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Story 4 -->
+                            <div class="flex-shrink-0 relative rounded-lg overflow-hidden w-32 h-48 bg-gradient-to-t from-gray-900 to-transparent">
+                                <img class="absolute inset-0 w-full h-full object-cover z-0" src="https://source.unsplash.com/random/300x500/?food" alt="Story">
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="h-10 w-10 rounded-full border-4 border-blue-500 overflow-hidden">
+                                        <img class="h-full w-full object-cover" src="https://randomuser.me/api/portraits/men/55.jpg" alt="User">
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 z-10">
+                                    <p class="text-white text-sm font-medium">Pedro Martínez</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Story 5 -->
+                            <div class="flex-shrink-0 relative rounded-lg overflow-hidden w-32 h-48 bg-gradient-to-t from-gray-900 to-transparent">
+                                <img class="absolute inset-0 w-full h-full object-cover z-0" src="https://source.unsplash.com/random/300x500/?travel" alt="Story">
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="h-10 w-10 rounded-full border-4 border-blue-500 overflow-hidden">
+                                        <img class="h-full w-full object-cover" src="https://randomuser.me/api/portraits/women/66.jpg" alt="User">
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 left-3 right-3 z-10">
+                                    <p class="text-white text-sm font-medium">Laura Sánchez</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Posts Feed -->
+                    <div id="postsContainer">
+                        <!-- Post 1 -->
+                        <div class="bg-white rounded-lg shadow post-animation">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex space-x-3">
+                                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User avatar">
+                                        <div>
+                                            <h4 class="font-medium">Ana López</h4>
+                                            <p class="text-xs text-gray-500">Hace 2 horas · <i class="fas fa-globe-americas"></i></p>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-3">
+                                    <p>¡Acabo de terminar mi último proyecto! Estoy muy emocionada de compartirlo con todos ustedes. Ha sido un camino largo pero gratificante. #DesarrolloWeb #ProyectoFinalizado</p>
+                                </div>
+                            </div>
+                            <div class="border-t border-b border-gray-200">
+                                <img class="w-full object-cover" src="https://source.unsplash.com/random/800x400/?coding" alt="Post image">
+                            </div>
+                            <div class="p-3">
+                                <div class="flex justify-between items-center text-gray-500 text-sm mb-2">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex">
+                                            <div class="h-5 w-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">
+                                                <i class="fas fa-thumbs-up"></i>
+                                            </div>
+                                            <div class="h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-xs -ml-1">
+                                                <i class="fas fa-heart"></i>
+                                            </div>
+                                        </div>
+                                        <span>125</span>
+                                    </div>
+                                    <div>
+                                        <span>23 comentarios · 5 compartidos</span>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2 flex justify-between">
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300 reaction-btn">
+                                        <i class="far fa-thumbs-up mr-2"></i> Me gusta
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-comment-alt mr-2"></i> Comentar
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-share-square mr-2"></i> Compartir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Post 2 -->
+                        <div class="bg-white rounded-lg shadow mt-4 post-animation" style="animation-delay: 0.1s;">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex space-x-3">
+                                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User avatar">
+                                        <div>
+                                            <h4 class="font-medium">Carlos Ruiz</h4>
+                                            <p class="text-xs text-gray-500">Ayer a las 15:30 · <i class="fas fa-user-friends"></i></p>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-3">
+                                    <p>¡Increíble día en la playa con amigos! El sol, el mar y buena compañía. ¿Qué más se puede pedir? 😎🏖️ #Verano2023 #Amigos</p>
+                                </div>
+                            </div>
+                            <div class="border-t border-b border-gray-200">
+                                <div class="grid grid-cols-2 gap-0.5">
+                                    <img class="w-full h-48 object-cover" src="https://source.unsplash.com/random/400x400/?beach1" alt="Post image">
+                                    <img class="w-full h-48 object-cover" src="https://source.unsplash.com/random/400x400/?beach2" alt="Post image">
+                                    <img class="w-full h-48 object-cover" src="https://source.unsplash.com/random/400x400/?beach3" alt="Post image">
+                                    <img class="w-full h-48 object-cover" src="https://source.unsplash.com/random/400x400/?beach4" alt="Post image">
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <div class="flex justify-between items-center text-gray-500 text-sm mb-2">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex">
+                                            <div class="h-5 w-5 rounded-full bg-yellow-500 text-white flex items-center justify-center text-xs">
+                                                <i class="fas fa-laugh-squint"></i>
+                                            </div>
+                                        </div>
+                                        <span>89</span>
+                                    </div>
+                                    <div>
+                                        <span>15 comentarios · 3 compartidos</span>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2 flex justify-between">
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300 reaction-btn">
+                                        <i class="far fa-thumbs-up mr-2"></i> Me gusta
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-comment-alt mr-2"></i> Comentar
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-share-square mr-2"></i> Compartir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Post 3 -->
+                        <div class="bg-white rounded-lg shadow mt-4 post-animation" style="animation-delay: 0.2s;">
+                            <div class="p-4">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex space-x-3">
+                                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/33.jpg" alt="User avatar">
+                                        <div>
+                                            <h4 class="font-medium">María García</h4>
+                                            <p class="text-xs text-gray-500">Ayer a las 10:15 · <i class="fas fa-globe-americas"></i></p>
+                                        </div>
+                                    </div>
+                                    <button class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-3">
+                                    <p>Recomiendo mucho este libro para quienes quieran mejorar sus habilidades de comunicación. A mí me ha ayudado mucho en mi trabajo y relaciones personales.</p>
+                                    <div class="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                        <div class="flex">
+                                            <img class="h-16 w-12 object-cover rounded" src="https://m.media-amazon.com/images/I/41e+7G6LQZL._SY425_.jpg" alt="Book cover">
+                                            <div class="ml-3">
+                                                <h5 class="font-medium text-sm">Cómo ganar amigos e influir sobre las personas</h5>
+                                                <p class="text-xs text-gray-500">Libro de Dale Carnegie</p>
+                                                <p class="text-xs text-blue-600">amazon.com</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <div class="flex justify-between items-center text-gray-500 text-sm mb-2">
+                                    <div class="flex items-center space-x-1">
+                                        <div class="flex">
+                                            <div class="h-5 w-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">
+                                                <i class="fas fa-thumbs-up"></i>
+                                            </div>
+                                        </div>
+                                        <span>67</span>
+                                    </div>
+                                    <div>
+                                        <span>12 comentarios · 2 compartidos</span>
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2 flex justify-between">
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300 reaction-btn">
+                                        <i class="far fa-thumbs-up mr-2"></i> Me gusta
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-comment-alt mr-2"></i> Comentar
+                                    </button>
+                                    <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                        <i class="far fa-share-square mr-2"></i> Compartir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Load More -->
+                    <div class="bg-white rounded-lg shadow mt-4 p-4 text-center">
+                        <button class="text-purple-600 font-medium hover:bg-gray-100 px-4 py-2 rounded-lg transition duration-300">
+                            <i class="fas fa-spinner animate-spin mr-2"></i> Cargar más publicaciones
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Sidebar -->
+                <div class="w-full lg:w-1/4 space-y-4">
+                    <!-- Sponsored -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-bold text-gray-900 mb-3">Patrocinado</h3>
+                        <div class="space-y-4">
+                            <a href="#" class="block group">
+                                <img class="w-full rounded-lg mb-2" src="https://source.unsplash.com/random/300x200/?ad" alt="Ad">
+                                <h4 class="text-sm font-medium group-hover:text-purple-600 transition duration-300">Aprende a programar en 3 meses</h4>
+                                <p class="text-xs text-gray-500">bootcampdev.com</p>
+                            </a>
+                            <a href="#" class="block group">
+                                <img class="w-full rounded-lg mb-2" src="https://source.unsplash.com/random/300x200/?ad2" alt="Ad">
+                                <h4 class="text-sm font-medium group-hover:text-purple-600 transition duration-300">Viajes con descuento este verano</h4>
+                                <p class="text-xs text-gray-500">viajesbaratos.com</p>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Birthdays -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-birthday-cake text-purple-600 mr-2"></i>
+                            <h3 class="font-bold text-gray-900">Cumpleaños</h3>
+                        </div>
+                        <p class="mt-2 text-sm"><span class="font-medium">Carlos Ruiz</span> y <span class="font-medium">2 amigos más</span> cumplen años hoy.</p>
+                    </div>
+                    
+                    <!-- Contacts -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-gray-900">Contactos</h3>
+                            <div class="flex space-x-2">
+                                <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                                    <i class="fas fa-video"></i>
+                                </button>
+                                <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">Ana López</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">Carlos Ruiz</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/33.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-yellow-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">María García</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/55.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">Pedro Martínez</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/66.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-gray-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">Laura Sánchez</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/77.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">David Fernández</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <img class="h-9 w-9 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/88.jpg" alt="User">
+                                    <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                </div>
+                                <span class="text-sm font-medium">Sofía Ramírez</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Group Conversations -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-gray-900">Conversaciones grupales</h3>
+                            <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <div class="h-9 w-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium">Grupo de programación</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <div class="h-9 w-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium">Amantes de la comida</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-1 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                <div class="relative">
+                                    <div class="h-9 w-9 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center">
+                                        <i class="fas fa-plane"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium">Viajeros del mundo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Notifications Panel (hidden by default) -->
+        <div id="notificationsPanel" class="fixed top-16 right-4 w-80 bg-white rounded-lg shadow-xl z-50 hidden">
+            <div class="border-b border-gray-200 p-4 flex justify-between items-center">
+                <h3 class="font-bold text-gray-900">Notificaciones</h3>
+                <button class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                        <div>
+                            <p class="text-sm"><span class="font-medium">Ana López</span> comentó tu publicación: "¡Qué increíble proyecto!"</p>
+                            <p class="text-xs text-gray-500">Hace 15 minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User">
+                        <div>
+                            <p class="text-sm"><span class="font-medium">Carlos Ruiz</span> compartió tu publicación</p>
+                            <p class="text-xs text-gray-500">Hace 1 hora</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm">Nuevas publicaciones en <span class="font-medium">Grupo de programación</span></p>
+                            <p class="text-xs text-gray-500">Hace 3 horas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/33.jpg" alt="User">
+                        <div>
+                            <p class="text-sm"><span class="font-medium">María García</span> te etiquetó en una publicación</p>
+                            <p class="text-xs text-gray-500">Ayer a las 14:30</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm">Es el cumpleaños de <span class="font-medium">Pedro Martínez</span> hoy</p>
+                            <p class="text-xs text-gray-500">Ayer a las 10:15</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 p-3 text-center">
+                <button class="text-purple-600 font-medium hover:bg-gray-100 px-4 py-1 rounded-lg transition duration-300 text-sm">
+                    Ver todas las notificaciones
+                </button>
+            </div>
+        </div>
+        
+        <!-- Messages Panel (hidden by default) -->
+        <div id="messagesPanel" class="fixed top-16 right-4 w-80 bg-white rounded-lg shadow-xl z-50 hidden">
+            <div class="border-b border-gray-200 p-4 flex justify-between items-center">
+                <h3 class="font-bold text-gray-900">Mensajes</h3>
+                <div class="flex space-x-2">
+                    <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="p-1 rounded-full text-gray-500 hover:bg-gray-100">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-3 border-b border-gray-200">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white" placeholder="Buscar mensajes...">
+                </div>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <img class="h-12 w-12 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                            <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="text-sm font-medium truncate">Ana López</h4>
+                                <span class="text-xs text-gray-500">15 min</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">¿Has visto el nuevo proyecto que compartí?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <img class="h-12 w-12 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User">
+                            <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="text-sm font-medium truncate">Carlos Ruiz</h4>
+                                <span class="text-xs text-gray-500">1 h</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">¡El viaje fue increíble! Te envío fotos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <img class="h-12 w-12 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/33.jpg" alt="User">
+                            <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-yellow-500 border-2 border-white"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="text-sm font-medium truncate">María García</h4>
+                                <span class="text-xs text-gray-500">3 h</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">Gracias por la recomendación del libro</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <img class="h-12 w-12 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/55.jpg" alt="User">
+                            <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-gray-500 border-2 border-white"></div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="text-sm font-medium truncate">Pedro Martínez</h4>
+                                <span class="text-xs text-gray-500">Ayer</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">¿Quedamos para comer el viernes?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 hover:bg-gray-50 cursor-pointer">
+                    <div class="flex space-x-3">
+                        <div class="relative">
+                            <div class="h-12 w-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between">
+                                <h4 class="text-sm font-medium truncate">Grupo de programación</h4>
+                                <span class="text-xs text-gray-500">Ayer</span>
+                            </div>
+                            <p class="text-sm text-gray-500 truncate">Juan: He subido el código del proyecto</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 p-3 text-center">
+                <button class="text-purple-600 font-medium hover:bg-gray-100 px-4 py-1 rounded-lg transition duration-300 text-sm">
+                    Ver todos los mensajes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginButton = document.getElementById('loginButton');
+        const registerButton = document.getElementById('registerButton');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const app = document.getElementById('app');
+        
+        // User menu
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenu = document.getElementById('userMenu');
+        
+        // Notifications and messages
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        const messagesBtn = document.getElementById('messagesBtn');
+        const messagesPanel = document.getElementById('messagesPanel');
+        
+        // Post creation
+        const createPostBtn = document.getElementById('createPostBtn');
+        const postModal = document.getElementById('postModal');
+        const closePostModal = document.getElementById('closePostModal');
+        const publishPost = document.getElementById('publishPost');
+        const postContent = document.getElementById('postContent');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const removePreview = document.getElementById('removePreview');
+        const postsContainer = document.getElementById('postsContainer');
+        
+        // Toggle between login and register modals
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.add('hidden');
+            registerModal.classList.remove('hidden');
+        });
+        
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerModal.classList.add('hidden');
+            loginModal.classList.remove('hidden');
+        });
+        
+        // Login functionality
+        loginButton.addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if(email && password) {
+                // In a real app, you would validate credentials with a server
+                loginModal.classList.add('hidden');
+                app.classList.remove('hidden');
+                
+                // Set user data
+                document.getElementById('userName').textContent = 'Juan Pérez';
+                document.getElementById('profileName').textContent = 'Juan Pérez';
+            } else {
+                alert('Por favor ingresa tu correo y contraseña');
+            }
+        });
+        
+        // Register functionality
+        registerButton.addEventListener('click', () => {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            const terms = document.getElementById('terms').checked;
+            
+            if(name && email && password && confirm && terms) {
+                if(password === confirm) {
+                    // In a real app, you would send this data to a server
+                    registerModal.classList.add('hidden');
+                    loginModal.classList.remove('hidden');
+                    alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                } else {
+                    alert('Las contraseñas no coinciden');
+                }
+            } else {
+                alert('Por favor completa todos los campos y acepta los términos');
+            }
+        });
+        
+        // Logout functionality
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            app.classList.add('hidden');
+            loginModal.classList.remove('hidden');
+        });
+        
+        // Toggle user menu
+        userMenuBtn.addEventListener('click', () => {
+            userMenu.classList.toggle('hidden');
+        });
+        
+        // Close menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if(!userMenuBtn.contains(e.target) && !userMenu.contains(e.target)) {
+                userMenu.classList.add('hidden');
+            }
+            
+            if(!notificationsBtn.contains(e.target) && !notificationsPanel.contains(e.target)) {
+                notificationsPanel.classList.add('hidden');
+            }
+            
+            if(!messagesBtn.contains(e.target) && !messagesPanel.contains(e.target)) {
+                messagesPanel.classList.add('hidden');
+            }
+        });
+        
+        // Toggle notifications panel
+        notificationsBtn.addEventListener('click', () => {
+            messagesPanel.classList.add('hidden');
+            notificationsPanel.classList.toggle('hidden');
+        });
+        
+        // Toggle messages panel
+        messagesBtn.addEventListener('click', () => {
+            notificationsPanel.classList.add('hidden');
+            messagesPanel.classList.toggle('hidden');
+        });
+        
+        // Post creation
+        createPostBtn.addEventListener('click', () => {
+            postModal.classList.remove('hidden');
+        });
+        
+        closePostModal.addEventListener('click', () => {
+            postModal.classList.add('hidden');
+            postContent.value = '';
+            previewContainer.classList.add('hidden');
+            imagePreview.classList.add('hidden');
+            imagePreview.src = '';
+            publishPost.disabled = true;
+        });
+        
+        // Enable/disable publish button based on content
+        postContent.addEventListener('input', () => {
+            if(postContent.value.trim() !== '' || imagePreview.src !== '') {
+                publishPost.disabled = false;
+            } else {
+                publishPost.disabled = true;
+            }
+        });
+        
+        // Simulate image upload
+        document.addEventListener('DOMContentLoaded', () => {
+            // This would be replaced with actual file upload in a real app
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+            
+            // When clicking on image button in post modal
+            document.querySelectorAll('.fa-images').forEach(icon => {
+                icon.addEventListener('click', () => {
+                    fileInput.click();
+                });
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if(e.target.files.length > 0) {
+                    // In a real app, you would upload the file to a server
+                    // Here we just simulate it with a random image
+                    const randomImage = Math.random() > 0.5 ? 
+                        'https://source.unsplash.com/random/800x400/?nature' : 
+                        'https://source.unsplash.com/random/800x400/?city';
+                    
+                    imagePreview.src = randomImage;
+                    imagePreview.classList.remove('hidden');
+                    previewContainer.classList.remove('hidden');
+                    
+                    if(postContent.value.trim() !== '' || imagePreview.src !== '') {
+                        publishPost.disabled = false;
+                    }
+                }
+            });
+        });
+        
+        // Remove preview image
+        removePreview.addEventListener('click', () => {
+            imagePreview.src = '';
+            imagePreview.classList.add('hidden');
+            previewContainer.classList.add('hidden');
+            
+            if(postContent.value.trim() === '') {
+                publishPost.disabled = true;
+            }
+        });
+        
+        // Publish new post
+        publishPost.addEventListener('click', () => {
+            const content = postContent.value.trim();
+            const hasImage = imagePreview.src !== '';
+            
+            if(content || hasImage) {
+                // Create new post element
+                const newPost = document.createElement('div');
+                newPost.className = 'bg-white rounded-lg shadow mt-4 post-animation';
+                newPost.innerHTML = `
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex space-x-3">
+                                <img class="h-10 w-10 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User avatar">
+                                <div>
+                                    <h4 class="font-medium">Juan Pérez</h4>
+                                    <p class="text-xs text-gray-500">Ahora mismo · <i class="fas fa-globe-americas"></i></p>
+                                </div>
+                            </div>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                        </div>
+                        <div class="mt-3">
+                            <p>${content || ''}</p>
+                        </div>
+                    </div>
+                    ${hasImage ? `
+                    <div class="border-t border-b border-gray-200">
+                        <img class="w-full object-cover" src="${imagePreview.src}" alt="Post image">
+                    </div>
+                    ` : ''}
+                    <div class="p-3">
+                        <div class="flex justify-between items-center text-gray-500 text-sm mb-2">
+                            <div class="flex items-center space-x-1">
+                                <span>0</span>
+                            </div>
+                            <div>
+                                <span>0 comentarios · 0 compartidos</span>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-2 flex justify-between">
+                            <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300 reaction-btn">
+                                <i class="far fa-thumbs-up mr-2"></i> Me gusta
+                            </button>
+                            <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                <i class="far fa-comment-alt mr-2"></i> Comentar
+                            </button>
+                            <button class="flex items-center justify-center flex-1 text-gray-500 hover:bg-gray-100 py-1 rounded-lg transition duration-300">
+                                <i class="far fa-share-square mr-2"></i> Compartir
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Add new post to the top of the feed
+                postsContainer.insertBefore(newPost, postsContainer.firstChild);
+                
+                // Reset and close modal
+                postContent.value = '';
+                previewContainer.classList.add('hidden');
+                imagePreview.classList.add('hidden');
+                imagePreview.src = '';
+                publishPost.disabled = true;
+                postModal.classList.add('hidden');
+                
+                // Scroll to the new post
+                newPost.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        
+        // Like button functionality
+        document.addEventListener('click', (e) => {
+            if(e.target.classList.contains('reaction-btn') || e.target.closest('.reaction-btn')) {
+                const button = e.target.classList.contains('reaction-btn') ? e.target : e.target.closest('.reaction-btn');
+                const icon = button.querySelector('i');
+                
+                if(icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    icon.classList.add('text-blue-500');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    icon.classList.remove('text-blue-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
